@@ -1,0 +1,16 @@
+Given the problem description, dataset info, and preprossing instructions below, generate a python script to preprocess the data. Print high-level status in the script. Save the processed data to the {output_dir} directory with the original table names. Please adhere to the following:
+- Don't change the existing column names. 
+- Don't change existing table names or append anything to the table names.
+- Please generate the script only but nothing else.
+
+Problem Description:
+{problem_summary}
+
+Available Datasets:
+{dataset_info}
+
+Data Paths:
+{data_paths}
+
+Preprocessing Instructions:
+{preprocessing_instructions}

@@ -1,0 +1,1 @@
+You are participating in a machine learning competition. Your job is to engineer features before model training.

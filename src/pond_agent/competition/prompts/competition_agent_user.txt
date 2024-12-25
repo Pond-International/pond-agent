@@ -1,0 +1,20 @@
+Analyze the problem description and the data dictionary to make a plan on how to solve the problem. If there are conflicts between the problem description and the data dictionary, the data dictionary will take precedence. Provide detailed and actionable instructions step by step:
+1. Summarize the problem in one sentence. Clearly define the specific machine learning task such as supervised or unsupervised. For supervised problems, specify Regression or Classification, and explicitely state which column in which table contains the labels for training. If labels are not found directly, provide instructions on how to calculate them in feature engineering.   
+2. Suggest which tables and columns are relavant and what need to be performed for data prreprocessing. Don't merge the tables unless absulutely necessary.  
+3. Check if feature engineering is needed. If so, provide detailed suggestions for feature engineering steps. 
+4. Given the ML task and processed data from previous steps, suggest what model type and hyperparameters to use.
+5. Provide instructions on how to generate the final submission for the competition.
+
+
+Problem description:
+{problem_desc}
+
+Data dictionary:
+{data_dictionary}
+
+Format your response as a JSON with the following keys. If a key is not needed, do not include it in the response:
+- summary: Specific ML task description from step 1.
+- preprocessing: Instructions on how to preprocess the data from step 2
+- feature_engineering: Instructions on how to engineer features from step 3
+- modeling: Model instructions from step 4
+- submission: Instructions on how to generate the final submission file from step 5

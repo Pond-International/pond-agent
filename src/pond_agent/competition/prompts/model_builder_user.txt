@@ -1,0 +1,17 @@
+Given the problem summary, feature table info, and model instructions below, generate a python script for model training: 
+- Remove features whose types are not compatible with the model.
+- Print high-level status in the script.
+- The final model should be saved under the {output_dir} directory.
+- Please generate the script only but nothing else.
+
+Problem Description:
+{problem_summary}
+
+Feature Table Info:
+{dataset_info}
+
+Data Paths:
+{data_paths}
+
+Model Instructions:
+{model_instructions}
