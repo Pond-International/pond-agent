@@ -26,16 +26,74 @@ predictions = agent.predict(test_data)
 
 ## Development
 
-Set up development environment:
+### Getting Started
 
+1. Clone the repository and create a new branch:
+```bash
+git clone https://github.com/cryptopond/pond-agent.git
+cd pond-agent
+git checkout -b feature/your-feature-name
+```
+
+2. Create a virtual environment (choose one):
+```bash
+# Using venv
+python -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+# OR
+.venv\Scripts\activate  # Windows
+
+# Using conda
+conda create -n pond-agent python=3.11
+conda activate pond-agent
+```
+
+3. Install package in development mode:
 ```bash
 pip install -e ".[dev]"
 ```
 
-Run tests:
+### Testing
+
+The project uses `pytest` for testing. Tests are located in the `tests/` directory.
+
+To run tests:
+```bash
+# Run all tests
+pytest
+
+# Run tests with coverage report
+pytest --cov=pond_agent
+
+# Run specific test file
+pytest tests/test_agent.py
+```
+
+To add new tests:
+1. Create test files in the `tests/` directory with the prefix `test_`
+2. Use pytest fixtures for common setup
+3. Follow the existing test structure for consistency
+4. Ensure tests are atomic and independent
+
+Example test:
+```python
+def test_agent_initialization():
+    agent = MLAgent()
+    assert agent.model is None
+```
+
+### Contributing
+
+1. Make your changes in your feature branch
+2. Add tests for new functionality
+3. Ensure all tests pass and code is formatted:
 ```bash
 pytest
+ruff check .
+ruff format .
 ```
+4. Commit your changes with clear messages
+5. Push to your fork and submit a Pull Request
 
 ## License
 
