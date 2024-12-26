@@ -1,11 +1,11 @@
 # Pond Agent
 
-A Python package for building AI agents to solve Pond's AI model competitions. This package is mainly for educational purposes and intended to show you how AI agents work under the hood. Hence, it is designed to be lightweight and doesn't use those popular agent frameworks. Moreover, it is also intended to be a good starting point for those who are not sure how to start with the competition. Lastly, you are more than welcome to build on top of this package to crack the competitions or build your own agent.
+A Python package for building AI agents to solve [Pond's AI model competitions](https://cryptopond.xyz/modelFactory/list). This package is mainly for educational purposes and intended to show you how AI agents work under the hood. Hence, it is designed to be lightweight and doesn't use those popular agent frameworks. Moreover, it is also intended to be a good starting point for those who are not sure how to start with the competition. Lastly, you are more than welcome to build on top of this package to crack the competitions or build your own agent.
 
 Currently, the package only includes the competition agent. More agents might be added in the future and you are invited to build them together!
 
 ## Features
-- End-to-end agent for solving Pond's AI model competitions. Currently, the agent supports supervised learning tasks but not recommendation tasks. 
+- End-to-end agent for solving [Pond's AI model competitions](https://cryptopond.xyz/modelFactory/list). Currently, the agent supports supervised learning tasks but not recommendation tasks. 
 - Minimalistic agent implementation using OpenAI's API directly. This way you can easily understand how the agent works and debug if things go wrong: use LLM to get instructions on how to solve a problem, use LLM to turn the instructions into code, and call tools such as Python to execute the code. However, this simplistic approach means it doesn't support many advanced features, such as memory, general tool usage, and complex workflows. But once you grasp the basics, it is easy to start with the fancier frameworks such as [LangChain](https://www.langchain.com/), [LlamaIndex](https://www.llamaindex.ai), [crewai](https://www.crewai.com/), [autogen](https://github.com/microsoft/autogen), [PydanticAI](https://ai.pydantic.dev/), just to name a few.
 - Modular architecture for easy extension. The competition agent is actually a collection of agents and tools including data processor, feature engineer, model builder, etc. You can add your own agents, tools, and LLMs.
 

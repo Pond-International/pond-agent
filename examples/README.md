@@ -1,6 +1,6 @@
 # Examples
 
-This directory contains example projects demonstrating how to use the Competition Agent to solve the [Sybil Addresses Prediction competition](https://cryptopond.xyz/modelFactory/detail/2). Each example is a complete end-to-end solution for a specific competition.
+This directory contains example projects demonstrating how to use the Competition Agent to solve [Pond's AI model competitions](https://cryptopond.xyz/modelFactory/list). Each example is a complete end-to-end solution for a specific competition.
 
 ## Available Examples
 
