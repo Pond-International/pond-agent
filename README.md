@@ -24,6 +24,17 @@ agent.train(dataset)
 predictions = agent.predict(test_data)
 ```
 
+## Examples
+
+Check out the [examples](examples/) directory for:
+- Jupyter notebooks with step-by-step tutorials
+- Sample datasets for testing
+- Custom agent implementations
+
+Common examples:
+1. [Basic Competition Agent](examples/notebooks/01_quickstart.ipynb)
+2. [Custom Agent Development](examples/notebooks/02_custom_agent.ipynb)
+
 ## Development
 
 ### Getting Started

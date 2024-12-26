@@ -44,22 +44,17 @@ build/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Example data
+examples/**/dataset/
+*.parquet
 
 # mypy
 .mypy_cache/
 
 # Misc
 .DS_Store
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 .tox/
