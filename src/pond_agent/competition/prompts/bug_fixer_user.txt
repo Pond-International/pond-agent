@@ -1,0 +1,9 @@
+Given the code and error below, analyze the issue and provide the corrected code. Focus only on fixing the specific error while maintaining the original functionality. Do not add comments or explanations, just output the corrected code.
+
+Code:
+{code}
+
+Error:
+{error}
+
+Please provide the corrected code below:
