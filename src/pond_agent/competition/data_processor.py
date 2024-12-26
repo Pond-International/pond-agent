@@ -155,13 +155,14 @@ class DataProcessor(BaseAgent):
                     with open(script_path, "w") as script_file:
                         script_file.write(fixed_code)
                     returncode, stderr = run_python_script(script_path, env, logger)
-                    retry_count -= 1
-                else:
-                    logger.error("Error fixing bug")
-                    raise RuntimeError("Error fixing bug") from None
+                retry_count -= 1
+
+            if returncode != 0:
+                msg = f"Cannot fix the bug: {stderr}"
+                logger.error(msg)
+                raise RuntimeError(msg) from None
 
             logger.info("Successfully executed data processing script")
-
             # Load processed datasets
             return load_parquet_data(self.output_dir)
 
@@ -169,3 +170,7 @@ class DataProcessor(BaseAgent):
             msg = f"Error executing data processing script: {e.stderr}"
             logger.error(msg)
             raise RuntimeError(msg) from e
+
+        except RuntimeError as e:
+            logger.error(str(e))
+            raise

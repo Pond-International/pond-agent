@@ -1,6 +1,7 @@
 Given the problem summary, processed dataset info, and feature engineering instructions below, generate a python script for feature engineering. Print high-level status in the script. Please adhere to the following:
 - The final output should be a feature table saved as `train.parquet` to the {output_dir} directory.
 - For supervised problems, the feature table should include the labels in the "LABEL" column.
+- For numerical features, consider log-transform or normalize if necessary.
 - Please generate the script only but nothing else.
 
 Problem Description:

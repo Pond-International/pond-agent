@@ -12,7 +12,7 @@ Problem description:
 Data dictionary:
 {data_dictionary}
 
-Format your response as a JSON with the following keys. If a key is not needed, do not include it in the response:
+Format your response as a JSON with the following keys:
 - summary: Specific ML task description from step 1.
 - preprocessing: Instructions on how to preprocess the data from step 2
 - feature_engineering: Instructions on how to engineer features from step 3

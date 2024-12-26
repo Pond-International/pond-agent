@@ -56,7 +56,7 @@ class LLMClient:
         prompt: str,
         system_prompt: str = "",
         json_response: bool = True,
-        temperature: float = 0.2,
+        temperature: float = 0.1,
         max_tokens: int = 1000,
     ) -> dict | str:
         """Get raw response from LLM.

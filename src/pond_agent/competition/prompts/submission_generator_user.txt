@@ -4,7 +4,7 @@ Given the task summary, submission instructions, feature engineering script, and
 - The feature table for model training might not contain features for the test set. In this case, create a feature table for the test set by copying the feature engineering process from the training set.
 - Print high-level status in the script. 
 - Follow submission instructions closely, especially for column names.
-- The final submission file should be saved under the {output_dir} directory.
+- The final submission file should be saved under the {output_dir} directory as "submission.csv".
 - Please generate the script only but nothing else.
 
 Task summary:
@@ -17,7 +17,7 @@ Dataset info:
 {dataset_info}
 
 Data Paths:
-{raw_data_paths}
+{data_paths}
 
 Feature Engineering Script:
 {fe_code}

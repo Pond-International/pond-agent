@@ -118,7 +118,7 @@ class ModelBuilder(BaseAgent):
         self.script = resp
         return resp
 
-    def run(self, retry_count: int = 3) -> dict[str, pl.DataFrame]:
+    def run(self, retry_count: int = 3) -> None:
         """Build model by executing generated script.
 
         Returns:
@@ -130,7 +130,7 @@ class ModelBuilder(BaseAgent):
         # Generate and save script
         script_path = self.generate_script()
         if not script_path.exists():
-            msg = f"model_building.py not found in {self.script_dir}"
+            msg = f"Model building script not found in {self.script_dir}"
             raise ValueError(msg)
 
         # Execute script in subprocess
@@ -153,17 +153,20 @@ class ModelBuilder(BaseAgent):
                     with open(script_path, "w") as script_file:
                         script_file.write(fixed_code)
                     returncode, stderr = run_python_script(script_path, env, logger)
-                    retry_count -= 1
-                else:
-                    logger.error("Error fixing bug")
-                    raise RuntimeError("Error fixing bug") from None
+                retry_count -= 1
+
+            if returncode != 0:
+                msg = f"Cannot fix the bug: {stderr}"
+                logger.error(msg)
+                raise RuntimeError(msg) from None
 
             logger.info("Successfully executed model building script")
-
-            # Load processed datasets
-            return load_parquet_data(self.output_dir)
 
         except subprocess.CalledProcessError as e:
             msg = f"Error executing model building script: {e.stderr}"
             logger.error(msg)
             raise RuntimeError(msg) from e
+
+        except RuntimeError as e:
+            logger.error(str(e))
+            raise
