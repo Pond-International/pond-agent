@@ -40,7 +40,7 @@ from pond_agent import CompetitionAgent
 
 # Initialize agent
 agent = CompetitionAgent(
-    project_dir="path/to/input/directory",
+    input_dir="path/to/input/directory",
     llm_provider="openai",
     model_name="gpt-4o"
 )
