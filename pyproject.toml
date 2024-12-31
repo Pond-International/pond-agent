@@ -40,7 +40,9 @@ dependencies = [
 dev = [
     "pytest>=8.0.0",
     "ruff>=0.6.0",
-    "pytest-cov"
+    "pytest-cov",
+    "build",
+    "twine"
 ]
 
 [build-system]
