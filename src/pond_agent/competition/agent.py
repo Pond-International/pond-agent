@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 import asyncio
 
 from ..llm import LLMClient
@@ -170,11 +170,78 @@ class CompetitionAgent(BaseAgent):
         resp = self.llm.get_response(user_prompt, sys_prompt, json_response=True)
         return resp
 
-    def _add_to_report(self, header: str, content: str) -> None:
-        """Add section to report."""
+    def _format_task_description(self, task_dict: dict) -> str:
+        """Format task description dictionary into readable markdown.
+        
+        Args:
+            task_dict: Dictionary containing task description
+            
+        Returns:
+            Formatted markdown string
+        """
+        lines = []
+        
+        # Problem Summary
+        lines.append("### Problem Summary")
+        lines.append(task_dict["summary"])
+        lines.append("")
+        
+        # Data Preprocessing
+        lines.append("### Data Preprocessing")
+        for table_name, table_info in task_dict["preprocessing"]["tables"].items():
+            lines.append(f"#### {table_name.replace('_', ' ').title()}")
+            lines.append("**Columns:**")
+            lines.append("```")
+            lines.append(", ".join(table_info["columns"]))
+            lines.append("```")
+            lines.append("**Actions:**")
+            lines.append(table_info["actions"])
+            lines.append("")
+            
+        # Feature Engineering
+        lines.append("### Feature Engineering")
+        for step in task_dict["feature_engineering"]["steps"]:
+            lines.append(f"- {step}")
+        lines.append("")
+        
+        # Modeling
+        lines.append("### Modeling")
+        lines.append(f"**Model Type:** {task_dict['modeling']['model_type']}")
+        lines.append("")
+        lines.append("**Hyperparameters:**")
+        lines.append("```")
+        for param, value in task_dict["modeling"]["hyperparameters"].items():
+            lines.append(f"{param}: {value}")
+        lines.append("```")
+        lines.append("")
+        
+        # Submission
+        lines.append("### Submission Instructions")
+        lines.append("")  # Add blank line for better readability
+        for instruction in task_dict["submission"]["instructions"]:
+            # Join characters if they were split
+            if isinstance(instruction, list):
+                instruction = "".join(instruction)
+            lines.append(f"- {instruction}")
+        
+        return "\n".join(lines)
+
+    def _add_to_report(self, header: str, content: Union[str, dict]) -> None:
+        """Add section to report.
+        
+        Args:
+            header: Section header
+            content: Content to add, can be string or dictionary for task description
+        """
         timestamp = datetime.now(tz=TIMEZONE).strftime("%Y-%m-%d %H:%M:%S")
-        self.report.append(f"{header} \n{timestamp}\n\n{content}\n")
-        with open(self.report_path, "w") as f:  # noqa: PTH123
+        
+        if isinstance(content, dict):
+            formatted_content = self._format_task_description(content)
+        else:
+            formatted_content = content
+            
+        self.report.append(f"{header} \n{timestamp}\n\n{formatted_content}\n")
+        with open(self.report_path, "w") as f:
             f.write("\n\n".join(self.report))
 
     def process_data(self) -> None:
