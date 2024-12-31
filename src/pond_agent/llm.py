@@ -28,10 +28,10 @@ class LLMClient:
         )
 
         # Load environment variables from .env file in current directory
-        if load_dotenv():
+        if load_dotenv(os.getcwd()+"/.env"):
             logger.info("Successfully loaded .env file")
         else:
-            logger.warning("No .env file found in current directory")
+            logger.warning(f"No .env file found in current directory {os.getcwd()}")
 
         if self.provider == "openai":
             api_key = os.getenv("OPENAI_API_KEY")
