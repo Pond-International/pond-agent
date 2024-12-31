@@ -179,6 +179,61 @@ def test_MyAgent_initialization():
     assert agent is not None
 ```
 
+### Publishing to PyPI
+
+1. Update version number in `pyproject.toml`:
+```toml
+[project]
+name = "pond-agent"
+version = "x.y.z"  # Update this version
+```
+
+2. Install build and publish tools:
+```bash
+pip install --upgrade build twine
+```
+
+3. Build the package:
+```bash
+# Clean previous builds
+rm -rf dist/
+rm -rf build/
+
+# Build new distribution
+python -m build
+```
+
+4. Test the package on TestPyPI (recommended):
+```bash
+# Upload to TestPyPI
+python -m twine upload --repository testpypi dist/*
+
+# Test installation from TestPyPI
+pip install --index-url https://test.pypi.org/simple/ pond-agent
+```
+
+5. Publish to PyPI:
+```bash
+# Upload to PyPI
+python -m twine upload dist/*
+```
+
+You'll need to provide your PyPI credentials when uploading. You can store them in `~/.pypirc` to avoid typing them each time:
+```ini
+[pypi]
+username = __token__
+password = your-pypi-token
+
+[testpypi]
+username = __token__
+password = your-testpypi-token
+```
+
+Make sure to:
+- Update the version number following [semantic versioning](https://semver.org/)
+- Test the package on TestPyPI before publishing to PyPI
+- Keep your PyPI tokens secure and never commit them to version control
+
 ### Contributing
 
 1. Make your changes in your feature branch
