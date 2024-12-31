@@ -4,13 +4,13 @@ A Python package for building AI agents to solve [Pond's AI model competitions](
 
 Currently, the package only includes the competition agent. More agents might be added in the future and you are invited to build them together!
 
+**Note**: As LLMs (e.g., GPT-4o) are not deterministic, the results may vary from run to run. It might even generate wrong code which cannot be executed. A bug fixing agent is included but it is not guaranteed to fix all bugs. If any error occurs, please rerun the notebook/script. If you encounter any issues, please report them as [GitHub Issues](https://github.com/Pond-International/pond-agent/issues).
+
 ## Features
 - End-to-end agent for solving [Pond's AI model competitions](https://cryptopond.xyz/modelFactory/list). Currently, the agent supports supervised learning tasks but not recommendation tasks. 
+- Automatic competition data scraping - just provide the competition URL and the agent will download all necessary files
 - Minimalistic agent implementation using OpenAI's API directly. This way you can easily understand how the agent works and debug if things go wrong: use LLM to get instructions on how to solve a problem, use LLM to turn the instructions into code, and call tools such as Python to execute the code. However, this simplistic approach means it doesn't support many advanced features, such as memory, general tool usage, and complex workflows. But once you grasp the basics, it is easy to start with the fancier frameworks such as [LangChain](https://www.langchain.com/), [LlamaIndex](https://www.llamaindex.ai), [crewai](https://www.crewai.com/), [autogen](https://github.com/microsoft/autogen), [PydanticAI](https://ai.pydantic.dev/), just to name a few.
 - Modular architecture for easy extension. The competition agent is actually a collection of agents and tools including data processor, feature engineer, model builder, etc. You can add your own agents, tools, and LLMs.
-
-
-
 
 ## Installation
 
@@ -22,25 +22,18 @@ pip install pond-agent
 
 Check out the [Examples](#Examples) below for quick start.
 
-To use the competition agent, you need to provide the following files in your input directory:
-1. `overview.md`: Description of the competition in markdown format. It can be copied from the competition webpage. Please copy all sections from the Overview tab on the page.
-2. `data_dictionary.xlsx`: Detailed description of the dataset as an Excel file including table and column information. It can be downloaded from the Dataset tab on the competition webpage. 
-3. `dataset/`: Directory containing data in parquet format. It can be downloaded from the Dataset tab on the competition webpage. Please unzip the downloaded file and put all files in this directory.
+There are two ways to set up the competition data:
 
-You also need to set up your OpenAI API credentials in a `.env` file in your project directory. Create a `.env` file with the following content:
-
-```env
-OPENAI_API_KEY=your-api-key-here
-```
-
-Example usage:
+### Option 1: Automatic Download (Recommended)
+Simply provide the competition URL when creating the agent:
 
 ```python
 from pond_agent import CompetitionAgent
 
-# Initialize agent
+# Initialize agent with competition URL
 agent = CompetitionAgent(
-    input_dir="path/to/input/directory",
+    working_dir="path/to/working/directory",
+    competition_url="https://cryptopond.xyz/modelFactory/detail/2",
     llm_provider="openai",
     model_name="gpt-4o"
 )
@@ -49,6 +42,35 @@ agent = CompetitionAgent(
 agent.run()
 ```
 
+The agent will automatically download:
+- Competition overview (`overview.md`)
+- Data dictionary (`data_dictionary.xlsx`)
+- Dataset files in the `dataset/` directory
+
+### Option 2: Manual Setup
+You can also manually set up the required files in your working directory:
+1. `overview.md`: Description of the competition in markdown format. Copy from the Overview tab on the competition webpage.
+2. `data_dictionary.xlsx`: Dataset description Excel file. Download from the Dataset tab.
+3. `dataset/`: Directory containing data in parquet format. Download and unzip from the Dataset tab.
+
+Then initialize the agent without a competition URL:
+```python
+agent = CompetitionAgent(
+    working_dir="path/to/working/directory",
+    llm_provider="openai",
+    model_name="gpt-4o"
+)
+```
+
+**Note**: If all required files already exist in your working directory, the agent will skip downloading even if `competition_url` is provided.
+
+### OpenAI API Setup
+Create a `.env` file in your project directory with your OpenAI API key:
+```env
+OPENAI_API_KEY=your-api-key-here
+```
+
+### Output Structure
 When you run the agent, it will:
 1. Create an `output/run_YYYYMMDD_HHMMSS/` directory containing:
    - `processed_data/`: Clean and preprocessed datasets
@@ -71,7 +93,7 @@ Check out the [examples](examples/) directory for:
 - Examples of execution logs and outputs
 
 Available examples:
-1. [Sybil Address Detection](examples/sybil_address/auto_ml.ipynb): End-to-end pipeline for the [sybil addresses detection competition](https://cryptopond.xyz/modelFactory/detail/2).
+1. [Sybil Address Detection](examples/sybil_address/): End-to-end pipeline for the [sybil addresses detection competition](https://cryptopond.xyz/modelFactory/detail/2).
 
 ## Development
 
@@ -115,6 +137,7 @@ pond-agent/
 │       │   ├── feature_engineer.py# Feature engineering agent
 │       │   ├── model_builder.py  # Model building agent
 │       │   ├── prompts/          # LLM prompt templates
+│       │   ├── scraper.py        # Competition data scraper
 │       │   ├── submission_generator.py # Submission file handling
 │       │   └── utils.py          # Utility functions
 │       ├── llm.py               # LLM integration and handling

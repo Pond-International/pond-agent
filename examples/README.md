@@ -5,22 +5,7 @@ This directory contains example projects demonstrating how to use the Competitio
 ## Available Examples
 
 ### [Sybil Address Prediction](sybil_address/)
-A complete example showing how to use the Competition Agent to predict sybil addresses in blockchain data. This example demonstrates:
-
-## Example Structure
-Each example follows a consistent structure:
-```
-example_name/
-├── input/                 # Competition materials
-│   ├── overview.md        # Competition description
-│   ├── data_dictionary.xlsx # Dataset documentation
-│   └── dataset/           # Competition datasets
-├── output/                # Generated outputs
-│   └── run_YYYYMMDD_HHMMSS/ # Timestamped run results
-├── logs/                  # Execution logs
-├── .env                   # OpenAI API configuration
-└── auto_ml.ipynb         # Step-by-step tutorial notebook
-```
+This example demonstrates how to use the Competition Agent to solve the [Sybil Addresses Prediction competition](https://cryptopond.xyz/modelFactory/detail/2). It shows a complete end-to-end pipeline from data processing to submission.
 
 ## Getting Started
 1. Choose an example that matches your interest
