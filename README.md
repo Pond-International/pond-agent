@@ -18,6 +18,14 @@ Currently, the package only includes the competition agent. More agents might be
 pip install pond-agent
 ```
 
+### Browser Setup
+The package uses Playwright for web scraping, which requires Chrome browser. After installing the package, run:
+```bash
+# Install browser
+playwright install chromium
+```
+If you're on Linux, you might need to install additional dependencies.
+
 ## Usage
 
 Check out the [Examples](#Examples) below for quick start.
@@ -123,6 +131,13 @@ conda activate pond-agent
 ```bash
 pip install -e ".[dev]"
 ```
+
+4. Install browser for web scraping:
+```bash
+# Install browser
+playwright install chromium
+```
+If you're on Linux, you might need to install additional dependencies.
 
 ### Project Structure
 ```
