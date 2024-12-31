@@ -55,5 +55,5 @@ addopts = "-ra -q"
 [tool.ruff]
 select = ["E", "F", "B"]
 ignore = []
-line-length = 88
+line-length = 98
 target-version = "py311"

@@ -3,6 +3,8 @@
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
+import asyncio
 
 from ..llm import LLMClient
 from .base import BaseAgent
@@ -10,6 +12,7 @@ from .data_processor import DataProcessor
 from .feature_engineer import FeatureEngineer
 from .model_builder import ModelBuilder
 from .submission_generator import SubmissionGenerator
+from .scraper import CompetitionScraper
 from .utils import (
     read_data_dictionary,
     read_problem_description,
@@ -24,23 +27,25 @@ class CompetitionAgent(BaseAgent):
 
     def __init__(
         self,
-        input_dir: str | Path,
+        working_dir: str | Path,
+        competition_url: Optional[str] = None,
         llm_provider: str = "openai",
         model_name: str = "gpt-4o",
     ) -> None:
         """Initialize AutoML agent.
 
         Args:
-            input_dir: Directory containing problem descriptions and data files
+            working_dir: Directory containing problem descriptions and data files
+            competition_url: Optional URL to competition page. If provided, data will be scraped
             llm_provider: LLM provider to use
             model_name: Name of the model to use
 
         """
         super().__init__()
-        self.input_dir = Path(input_dir).resolve()
-        self.data_dir = self.input_dir / "dataset"
+        self.working_dir = Path(working_dir).resolve()
+        self.data_dir = self.working_dir / "dataset"
         now = datetime.now(tz=TIMEZONE)
-        self.output_dir = Path.cwd() / "output" / f"run_{now.strftime('%Y%m%d_%H%M%S')}"
+        self.output_dir = self.working_dir / "output" / f"run_{now.strftime('%Y%m%d_%H%M%S')}"
         self.processed_dir = self.output_dir / "processed_data"
         self.feature_dir = self.output_dir / "feature_data"
         self.model_dir = self.output_dir / "models"
@@ -52,10 +57,27 @@ class CompetitionAgent(BaseAgent):
         # Initialize LLM client
         self.llm = LLMClient(llm_provider, model_name)
 
+        # If competition URL is provided, scrape the data
+        if competition_url:
+            logger.info(f"Scraping competition data from {competition_url}")
+            scraper = CompetitionScraper(str(self.working_dir))
+            scrape_result = asyncio.run(scraper.scrape(competition_url))
+            if not scrape_result or not scrape_result["dataset_dir"]:
+                raise RuntimeError("Failed to scrape competition data")
+            logger.info("Successfully scraped competition data")
+
+        # Verify required files exist
+        if not (self.working_dir / "overview.md").exists():
+            raise FileNotFoundError("overview.md not found in working directory")
+        if not (self.working_dir / "data_dictionary.xlsx").exists():
+            raise FileNotFoundError("data_dictionary.xlsx not found in working directory")
+        if not self.data_dir.exists():
+            raise FileNotFoundError("dataset directory not found in working directory")
+
         # Load and analyze problem description
-        self.problem_desc = read_problem_description(self.input_dir / "overview.md")
+        self.problem_desc = read_problem_description(self.working_dir / "overview.md")
         self.data_dictionary = read_data_dictionary(
-            self.input_dir / "data_dictionary.xlsx"
+            self.working_dir / "data_dictionary.xlsx"
         )
         self.task_description = self.plan_tasks()
 
@@ -104,6 +126,8 @@ class CompetitionAgent(BaseAgent):
 
     def _setup_output_dirs(self) -> None:
         """Create output directories."""
+        Path(self.working_dir).mkdir(parents=True, exist_ok=True)
+        Path(self.data_dir).mkdir(parents=True, exist_ok=True)
         Path(self.output_dir).mkdir(parents=True, exist_ok=True)
         Path(self.processed_dir).mkdir(parents=True, exist_ok=True)
         Path(self.feature_dir).mkdir(parents=True, exist_ok=True)

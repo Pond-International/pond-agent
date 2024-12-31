@@ -26,6 +26,7 @@ class CompetitionScraper(BaseAgent):
         self.dataset_dir = self.output_dir / "dataset"
         self.playwright = None
         self.browser = None
+        os.makedirs(self.dataset_dir, exist_ok=True)
 
     async def __aenter__(self):
         p = await async_playwright().start()
@@ -159,6 +160,10 @@ class CompetitionScraper(BaseAgent):
                 # Process each parquet file
                 processed_dirs = set()
                 for root, file in parquet_files:
+                    # Skip hidden files (starting with a dot)
+                    if file.startswith('.'):
+                        continue
+                        
                     # Skip if we've already processed this directory
                     if root in processed_dirs:
                         continue
