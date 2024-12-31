@@ -234,10 +234,15 @@ class CompetitionScraper(BaseAgent):
             logger.info("Overview length: %d", len(overview) if overview else 0)
 
             # Write overview to file
-            overview_file = self.output_dir / "overview.md"
+            overview_file = None
             if overview:
+                overview_file = self.output_dir / "overview.md"
                 with open(overview_file, "w") as f:
                     f.write(overview)
+                logger.info(f"Saved overview to: {overview_file}")
+            else:
+                logger.error("Failed to extract overview")
+                
 
             # Extract datasets
             logger.info("Extracting datasets...")
@@ -256,22 +261,24 @@ class CompetitionScraper(BaseAgent):
                 if await self._download_file(export_url, data_dict_file):
                     logger.info(f"Downloaded data dictionary to: {data_dict_file}")
                 else:
-                    logger.warning("Failed to download data dictionary")
+                    logger.error("Failed to download data dictionary")
                     data_dict_file = None
 
             # Download and extract dataset
+            dataset_files = None
             if dataset_urls:
+                dataset_files = self.dataset_dir
                 for filename, url in dataset_urls.items():
                     if await self._download_and_extract_dataset(url, filename):
                         logger.info(f"Successfully processed dataset: {filename}")
                     else:
                         logger.error(f"Failed to process dataset: {filename}")
+                        dataset_files = None
 
             return {
                 "overview": overview_file,
                 "data_dictionary": data_dict_file,
-                "datasets": dataset_urls,
-                "dataset_dir": self.dataset_dir if dataset_urls else None,
+                "dataset_dir": dataset_files,
             }
 
     async def _extract_overview(self, soup: BeautifulSoup) -> str:

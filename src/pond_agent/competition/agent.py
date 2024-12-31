@@ -37,9 +37,12 @@ class CompetitionAgent(BaseAgent):
         Args:
             working_dir: Directory containing problem descriptions and data files
             competition_url: Optional URL to competition page. If provided, data will be scraped
+                only if required files don't already exist
             llm_provider: LLM provider to use
             model_name: Name of the model to use
 
+        Raises:
+            FileNotFoundError: If competition_url is not provided and required files are missing
         """
         super().__init__()
         self.working_dir = Path(working_dir).resolve()
@@ -50,6 +53,8 @@ class CompetitionAgent(BaseAgent):
         self.feature_dir = self.output_dir / "feature_data"
         self.model_dir = self.output_dir / "models"
         self.script_dir = self.output_dir / "scripts"
+        self.competition_url = competition_url
+        self.skip_scraping = False
 
         # Create output directories
         self._setup_output_dirs()
@@ -57,38 +62,42 @@ class CompetitionAgent(BaseAgent):
         # Initialize LLM client
         self.llm = LLMClient(llm_provider, model_name)
 
-        # If competition URL is provided, scrape the data
+        # Check for existing dataset files
+        has_overview = (self.working_dir / "overview.md").exists()
+        has_data_dict = (self.working_dir / "data_dictionary.xlsx").exists()
+        has_dataset = self.data_dir.exists()
+        
+        self.scraper = CompetitionScraper(str(self.working_dir))
         if competition_url:
-            logger.info(f"Scraping competition data from {competition_url}")
-            scraper = CompetitionScraper(str(self.working_dir))
-            scrape_result = asyncio.run(scraper.scrape(competition_url))
-            if not scrape_result or not scrape_result["dataset_dir"]:
-                raise RuntimeError("Failed to scrape competition data")
-            logger.info("Successfully scraped competition data")
+            # If all files exist, set flag to skip scraping
+            if has_overview and has_data_dict and has_dataset:
+                logger.warning(
+                    "Competition files already exist in working directory. "
+                    "Skipping competition data scraping."
+                )
+                self.skip_scraping = True
+        else:
+            # If no competition URL, verify required files exist
+            if not has_overview:
+                raise FileNotFoundError("overview.md not found in working directory")
+            if not has_data_dict:
+                raise FileNotFoundError("data_dictionary.xlsx not found in working directory")
+            if not has_dataset:
+                raise FileNotFoundError("dataset directory not found in working directory")
 
-        # Verify required files exist
-        if not (self.working_dir / "overview.md").exists():
-            raise FileNotFoundError("overview.md not found in working directory")
-        if not (self.working_dir / "data_dictionary.xlsx").exists():
-            raise FileNotFoundError("data_dictionary.xlsx not found in working directory")
-        if not self.data_dir.exists():
-            raise FileNotFoundError("dataset directory not found in working directory")
+        # Initialize report
+        self.report = []
+        self.report_path = self.output_dir / "report.md"
+        self._add_to_report("# Model Development Report", "")
 
-        # Load and analyze problem description
-        self.problem_desc = read_problem_description(self.working_dir / "overview.md")
-        self.data_dictionary = read_data_dictionary(
-            self.working_dir / "data_dictionary.xlsx"
-        )
-        self.task_description = self.plan_tasks()
-
-        # Initialize other agents with shared information
+        # Initialize other agents without task description and data dictionary
         self.data_processor = DataProcessor(
             self.llm,
             input_dir=self.data_dir,
             output_dir=self.processed_dir,
             script_dir=self.script_dir,
-            task_description=self.task_description,
-            data_dictionary=self.data_dictionary,
+            task_description={},
+            data_dictionary={},
         )
 
         self.feature_engineer = FeatureEngineer(
@@ -96,8 +105,8 @@ class CompetitionAgent(BaseAgent):
             input_dir=self.processed_dir,
             output_dir=self.feature_dir,
             script_dir=self.script_dir,
-            task_description=self.task_description,
-            data_dictionary=self.data_dictionary,
+            task_description={},
+            data_dictionary={},
         )
 
         self.model_builder = ModelBuilder(
@@ -105,8 +114,8 @@ class CompetitionAgent(BaseAgent):
             input_dir=self.feature_dir,
             output_dir=self.model_dir,
             script_dir=self.script_dir,
-            task_description=self.task_description,
-            data_dictionary=self.data_dictionary,
+            task_description={},
+            data_dictionary={},
         )
 
         self.submission_generator = SubmissionGenerator(
@@ -114,15 +123,21 @@ class CompetitionAgent(BaseAgent):
             raw_data_dir=self.data_dir,
             output_dir=self.output_dir,
             script_dir=self.script_dir,
-            task_description=self.task_description,
-            data_dictionary=self.data_dictionary,
+            task_description={},
+            data_dictionary={},
         )
 
-        # Initialize report
-        self.report = []
-        self.report_path = self.output_dir / "report.md"
-        self._add_to_report("# Model Development Report", "")
-        self._add_to_report("## Development Plan", self.task_description)
+    def _update_agent_configs(self, task_description: dict, data_dictionary: dict) -> None:
+        """Update task description and data dictionary for all agents.
+        
+        Args:
+            task_description: Task description dictionary
+            data_dictionary: Data dictionary
+        """
+        for agent in [self.data_processor, self.feature_engineer, 
+                     self.model_builder, self.submission_generator]:
+            agent.task_description = task_description
+            agent.data_dictionary = data_dictionary
 
     def _setup_output_dirs(self) -> None:
         """Create output directories."""
@@ -245,6 +260,35 @@ class CompetitionAgent(BaseAgent):
     def run(self) -> None:
         """Run the complete model development pipeline."""
         logger.info("Starting model development pipeline")
+
+        # If competition URL is provided and scraping not skipped, scrape the data
+        if self.competition_url and not self.skip_scraping:
+            logger.info(f"Scraping competition data from {self.competition_url}")
+            scrape_result = asyncio.run(self.scraper.scrape(self.competition_url))
+            if any(val is None for val in scrape_result.values()):
+                raise RuntimeError(f"Failed to scrape competition data: {scrape_result}")
+            logger.info("Successfully scraped competition data")
+
+            # Verify required files exist after scraping
+            if not (self.working_dir / "overview.md").exists():
+                raise FileNotFoundError("overview.md not found in working directory")
+            if not (self.working_dir / "data_dictionary.xlsx").exists():
+                raise FileNotFoundError("data_dictionary.xlsx not found in working directory")
+            if not self.data_dir.exists():
+                raise FileNotFoundError("dataset directory not found in working directory")
+
+        # Load and analyze problem description
+        self.problem_desc = read_problem_description(self.working_dir / "overview.md")
+        self.data_dictionary = read_data_dictionary(
+            self.working_dir / "data_dictionary.xlsx"
+        )
+        self.task_description = self.plan_tasks()
+
+        # Update agent configurations with task description and data dictionary
+        self._update_agent_configs(self.task_description, self.data_dictionary)
+
+        # Add development plan to report
+        self._add_to_report("## Development Plan", self.task_description)
 
         # Process data
         self.process_data()
