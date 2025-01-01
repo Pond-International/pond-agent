@@ -2,6 +2,7 @@
 
 import logging
 from datetime import datetime
+import json
 from pathlib import Path
 from typing import Optional, Union
 import asyncio
@@ -66,7 +67,7 @@ class CompetitionAgent(BaseAgent):
         has_overview = (self.working_dir / "overview.md").exists()
         has_data_dict = (self.working_dir / "data_dictionary.xlsx").exists()
         has_dataset = self.data_dir.exists()
-        
+
         self.scraper = CompetitionScraper(str(self.working_dir))
         if competition_url:
             # If all files exist, set flag to skip scraping
@@ -129,13 +130,17 @@ class CompetitionAgent(BaseAgent):
 
     def _update_agent_configs(self, task_description: dict, data_dictionary: dict) -> None:
         """Update task description and data dictionary for all agents.
-        
+
         Args:
             task_description: Task description dictionary
             data_dictionary: Data dictionary
         """
-        for agent in [self.data_processor, self.feature_engineer, 
-                     self.model_builder, self.submission_generator]:
+        for agent in [
+            self.data_processor,
+            self.feature_engineer,
+            self.model_builder,
+            self.submission_generator,
+        ]:
             agent.task_description = task_description
             agent.data_dictionary = data_dictionary
 
@@ -172,74 +177,62 @@ class CompetitionAgent(BaseAgent):
 
     def _format_task_description(self, task_dict: dict) -> str:
         """Format task description dictionary into readable markdown.
-        
+
         Args:
             task_dict: Dictionary containing task description
-            
+
         Returns:
             Formatted markdown string
         """
         lines = []
-        
+
+        def format_value(value) -> str:
+            if not value:
+                return "No information provided"
+            if isinstance(value, str):
+                return value
+            return f"```json\n{json.dumps(value, indent=2)}\n```"
+
         # Problem Summary
         lines.append("### Problem Summary")
-        lines.append(str(task_dict["summary"]))
+        lines.append(format_value(task_dict.get("summary", "")))
         lines.append("")
-        
+
         # Data Preprocessing
         lines.append("### Data Preprocessing")
-        for table_name, table_info in task_dict["preprocessing"]["tables"].items():
-            lines.append(f"#### {table_name.replace('_', ' ').title()}")
-            lines.append("**Columns:**")
-            lines.append("```")
-            lines.append(", ".join(str(col) for col in table_info["columns"]))
-            lines.append("```")
-            lines.append("**Actions:**")
-            lines.append(str(table_info["actions"]))
-            lines.append("")
-            
+        lines.append(format_value(task_dict.get("preprocessing", "")))
+        lines.append("")
+
         # Feature Engineering
         lines.append("### Feature Engineering")
-        for step in task_dict["feature_engineering"]["steps"]:
-            lines.append(f"- {step}")
+        lines.append(format_value(task_dict.get("feature_engineering", "")))
         lines.append("")
-        
+
         # Modeling
         lines.append("### Modeling")
-        lines.append(f"**Model Type:** {task_dict['modeling']['model_type']}")
+        lines.append(format_value(task_dict.get("modeling", "")))
         lines.append("")
-        lines.append("**Hyperparameters:**")
-        lines.append("```")
-        for param, value in task_dict["modeling"]["hyperparameters"].items():
-            lines.append(f"{param}: {value}")
-        lines.append("```")
-        lines.append("")
-        
+
         # Submission
-        lines.append("### Submission Instructions")
-        lines.append("")  # Add blank line for better readability
-        for instruction in task_dict["submission"]["instructions"]:
-            # Handle both string and list cases
-            if isinstance(instruction, (list, tuple)):
-                instruction = "".join(str(i) for i in instruction)
-            lines.append(f"- {str(instruction)}")
-        
-        return "\n".join(str(line) for line in lines)
+        lines.append("### Submission")
+        lines.append(format_value(task_dict.get("submission", "")))
+
+        return "\n".join(lines)
 
     def _add_to_report(self, header: str, content: Union[str, dict]) -> None:
         """Add section to report.
-        
+
         Args:
             header: Section header
             content: Content to add, can be string or dictionary for task description
         """
         timestamp = datetime.now(tz=TIMEZONE).strftime("%Y-%m-%d %H:%M:%S")
-        
+
         if isinstance(content, dict):
             formatted_content = self._format_task_description(content)
         else:
             formatted_content = content
-            
+
         self.report.append(f"{header} \n{timestamp}\n\n{formatted_content}\n")
         with open(self.report_path, "w") as f:
             f.write("\n\n".join(self.report))
@@ -346,9 +339,7 @@ class CompetitionAgent(BaseAgent):
 
         # Load and analyze problem description
         self.problem_desc = read_problem_description(self.working_dir / "overview.md")
-        self.data_dictionary = read_data_dictionary(
-            self.working_dir / "data_dictionary.xlsx"
-        )
+        self.data_dictionary = read_data_dictionary(self.working_dir / "data_dictionary.xlsx")
         self.task_description = self.plan_tasks()
 
         # Update agent configurations with task description and data dictionary

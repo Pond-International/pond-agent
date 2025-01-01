@@ -449,63 +449,75 @@ class CompetitionScraper(BaseAgent):
                     count = await rows.count()
                     logger.debug(f"Found {count} rows in table")
 
+                    # First pass: find all zip files
+                    zip_files = []
                     for i in range(count):
                         row = rows.nth(i)
                         cells = row.locator("td")
                         cell_count = await cells.count()
-                        if (
-                            cell_count >= 4
-                        ):  # Need filename, size, download button, and dictionary 
+                        if cell_count >= 4:
                             filename = await cells.nth(0).text_content()
                             filename = filename.strip()
-                            if filename and not filename.isdigit():
-                                logger.debug(f"Found filename: {filename}")
+                            if filename.endswith(".zip"):
+                                zip_files.append((i, filename))
+                    
+                    # Determine which zip file to download
+                    target_row = None
+                    if len(zip_files) == 1:
+                        # If only one zip file, use that
+                        target_row = zip_files[0][0]
+                        logger.info(f"Found single zip file: {zip_files[0][1]}")
+                    elif len(zip_files) == 2:
+                        # If two zip files, use the one with _subset.zip
+                        for row_idx, filename in zip_files:
+                            if filename.endswith("_subset.zip"):
+                                target_row = row_idx
+                                logger.info(f"Found subset zip file: {filename}")
+                                break
+                    else:
+                        logger.warning(f"Unexpected number of zip files: {len(zip_files)}")
+                        return None, {}
 
-                                # Get download URL
-                                download_cell = cells.nth(2)
-                                download_button = download_cell.locator(
-                                    'div[role="group"]'
-                                )
-                                if await download_button.count() > 0:
-                                    button_text = await download_button.text_content()
-                                    if "Download" in button_text:
-                                        try:
-                                            async with page.expect_download(
-                                                timeout=5000
-                                            ) as download_info:
-                                                await download_button.click()
-                                            download = await download_info.value
-                                            dataset_urls[filename] = download.url
-                                            await download.cancel()
-                                        except Exception as e:
-                                            logger.warning(
-                                                f"Error getting download URL: {e}"
-                                            )
+                    if target_row is None:
+                        logger.warning("Could not find appropriate zip file to download")
+                        return None, {}
 
-                                # Get data dictionary URL
-                                dict_cell = cells.nth(3)
-                                dict_button = dict_cell.locator('div[role="group"]')
-                                if await dict_button.count() > 0:
-                                    button_text = await dict_button.text_content()
-                                    logger.debug(
-                                        f"Dictionary button text: {button_text}"
-                                    )
-                                    if "View Dictionary" in button_text:
-                                        try:
-                                            async with (
-                                                page.expect_popup() as popup_info
-                                            ):
-                                                await dict_button.click()
-                                            popup = await popup_info.value
-                                            dictionary_url = popup.url
-                                            await popup.close()
-                                            logger.info(
-                                                f"Found dictionary URL: {dictionary_url}"
-                                            )
-                                        except Exception as e:
-                                            logger.warning(
-                                                f"Error getting dictionary URL: {e}"
-                                            )
+                    # Process the target row
+                    row = rows.nth(target_row)
+                    cells = row.locator("td")
+                    filename = await cells.nth(0).text_content()
+                    filename = filename.strip()
+                    
+                    # Get download URL for the zip file
+                    download_cell = cells.nth(2)
+                    download_button = download_cell.locator('div[role="group"]')
+                    if await download_button.count() > 0:
+                        button_text = await download_button.text_content()
+                        if "Download" in button_text:
+                            try:
+                                async with page.expect_download(timeout=5000) as download_info:
+                                    await download_button.click()
+                                download = await download_info.value
+                                dataset_urls[filename] = download.url
+                                await download.cancel()
+                            except Exception as e:
+                                logger.warning(f"Error getting download URL: {e}")
+
+                    # Get data dictionary URL from the same row
+                    dict_cell = cells.nth(3)
+                    dict_button = dict_cell.locator('div[role="group"]')
+                    if await dict_button.count() > 0:
+                        button_text = await dict_button.text_content()
+                        logger.debug(f"Dictionary button text: {button_text}")
+                        if "View Dictionary" in button_text:
+                            try:
+                                async with page.expect_popup() as popup_info:
+                                    await dict_button.click()
+                                popup = await popup_info.value
+                                dictionary_url = popup.url
+                                await popup.close()
+                            except Exception as e:
+                                logger.warning(f"Error getting dictionary URL: {e}")
                     break
         except Exception as e:
             logger.warning(f"Error getting dataset URLs: {e}")
