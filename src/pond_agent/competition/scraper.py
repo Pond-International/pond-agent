@@ -72,18 +72,6 @@ class CompetitionScraper(BaseAgent):
             logger.warning(f"Error downloading file: {e}")
             return False
 
-    async def _init_browser(self):
-        """Initialize Playwright browser"""
-        self.playwright = await async_playwright().start()
-        self.browser = await self.playwright.chromium.launch()
-
-    async def _close_browser(self):
-        """Close Playwright browser"""
-        if self.browser:
-            await self.browser.close()
-        if self.playwright:
-            await self.playwright.stop()
-
     async def _get_page_content(self, url):
         """Get rendered page content using Playwright"""
         page = await self.browser.new_page()
@@ -413,8 +401,78 @@ class CompetitionScraper(BaseAgent):
         """Extract dataset URLs from the page."""
         logger.info("Clicking Datasets tab...")
 
-        # Click the Datasets tab and wait for content
-        await page.click('button:has-text("Datasets")')
+        # Try to close any modal dialogs that might be in the way
+        try:
+            # Wait for and close any modal dialogs
+            modal_selectors = [
+                'button[aria-label="Close"]',
+                'button[class*="modal-close"]',
+                'div[role="dialog"] button',
+                'div[class*="modal"] button'
+            ]
+            for selector in modal_selectors:
+                try:
+                    modal_close = page.locator(selector).first
+                    await modal_close.click(timeout=2000, force=True)
+                    logger.info(f"Closed modal dialog using selector: {selector}")
+                    await page.wait_for_timeout(1000)  # Wait for modal to fully close
+                except Exception as e:
+                    logger.debug(f"No modal found with selector {selector}: {e}")
+
+        except Exception as e:
+            logger.debug(f"Error handling modals: {e}")
+
+        # Add retry logic for clicking the Datasets tab
+        max_retries = 3
+        retry_delay = 2000  # 2 seconds
+
+        for attempt in range(max_retries):
+            try:
+                # Wait a bit before retrying
+                if attempt > 0:
+                    await page.wait_for_timeout(retry_delay)
+                    logger.info(f"Retry attempt {attempt + 1} of {max_retries}")
+
+                # First try: Regular click
+                try:
+                    datasets_tab = page.locator('button:has-text("Datasets")')
+                    await datasets_tab.click(timeout=10000)
+                    break
+                except Exception as click_error:
+                    logger.warning(f"Regular click failed: {click_error}")
+                    
+                    # Second try: Force click
+                    try:
+                        await datasets_tab.click(timeout=10000, force=True)
+                        break
+                    except Exception as force_error:
+                        logger.warning(f"Force click failed: {force_error}")
+                        
+                        # Last try: JavaScript click
+                        try:
+                            await page.evaluate('''() => {
+                                const buttons = Array.from(document.querySelectorAll('button'));
+                                const datasetsButton = buttons.find(b => b.textContent.includes('Datasets'));
+                                if (datasetsButton) {
+                                    datasetsButton.click();
+                                    return true;
+                                }
+                                return false;
+                            }''')
+                            logger.info("Attempted JavaScript click")
+                            await page.wait_for_timeout(2000)
+                            break
+                        except Exception as js_error:
+                            logger.warning(f"JavaScript click failed: {js_error}")
+                            if attempt == max_retries - 1:
+                                logger.error("All click attempts failed")
+                                return None, {}
+
+            except Exception as e:
+                logger.warning(f"Failed to click Datasets tab (attempt {attempt + 1}): {e}")
+                if attempt == max_retries - 1:
+                    logger.error(f"Failed to click Datasets tab after {max_retries} attempts")
+                    return None, {}
 
         try:
             # Wait for table to appear

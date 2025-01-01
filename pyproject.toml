@@ -1,6 +1,6 @@
 [project]
 name = "pond-agent"
-version = "0.1.3"
+version = "0.1.4"
 description = "AI agents for Pond"
 authors = [
     {name = "bill@cryptopond.xyz"}
