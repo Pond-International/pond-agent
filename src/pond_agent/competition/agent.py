@@ -183,7 +183,7 @@ class CompetitionAgent(BaseAgent):
         
         # Problem Summary
         lines.append("### Problem Summary")
-        lines.append(task_dict["summary"])
+        lines.append(str(task_dict["summary"]))
         lines.append("")
         
         # Data Preprocessing
@@ -192,10 +192,10 @@ class CompetitionAgent(BaseAgent):
             lines.append(f"#### {table_name.replace('_', ' ').title()}")
             lines.append("**Columns:**")
             lines.append("```")
-            lines.append(", ".join(table_info["columns"]))
+            lines.append(", ".join(str(col) for col in table_info["columns"]))
             lines.append("```")
             lines.append("**Actions:**")
-            lines.append(table_info["actions"])
+            lines.append(str(table_info["actions"]))
             lines.append("")
             
         # Feature Engineering
@@ -219,12 +219,12 @@ class CompetitionAgent(BaseAgent):
         lines.append("### Submission Instructions")
         lines.append("")  # Add blank line for better readability
         for instruction in task_dict["submission"]["instructions"]:
-            # Join characters if they were split
-            if isinstance(instruction, list):
-                instruction = "".join(instruction)
-            lines.append(f"- {instruction}")
+            # Handle both string and list cases
+            if isinstance(instruction, (list, tuple)):
+                instruction = "".join(str(i) for i in instruction)
+            lines.append(f"- {str(instruction)}")
         
-        return "\n".join(lines)
+        return "\n".join(str(line) for line in lines)
 
     def _add_to_report(self, header: str, content: Union[str, dict]) -> None:
         """Add section to report.
