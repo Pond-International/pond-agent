@@ -9,11 +9,27 @@ Currently, the package only includes the competition agent. More agents might be
 * This package is still under development and is not intended for production use. Please proceed at your own risk.
 * There is no guarantee it will solve all ML problems or competitions. At present, only binary classification and regression tasks have been tested.
 
+## Table of Contents
+- [Features](#features)
+- [What's Next](#whats-next)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Examples](#examples)
+- [Development](#development)
+
 ## Features
 - End-to-end agent for solving [Pond's AI model competitions](https://cryptopond.xyz/modelFactory/list). Currently, the agent supports supervised learning tasks but not recommendation tasks. 
 - Automatic competition data scraping - just provide the competition URL and the agent will download all necessary files
 - Minimalistic agent implementation using OpenAI's API directly. This way you can easily understand how the agent works and debug if things go wrong: use LLM to get instructions on how to solve a problem, use LLM to turn the instructions into code, and call tools such as Python to execute the code. However, this simplistic approach means it doesn't support many advanced features, such as memory, general tool usage, and complex workflows. But once you grasp the basics, it is easy to start with the fancier frameworks such as [LangChain](https://www.langchain.com/), [LlamaIndex](https://www.llamaindex.ai), [crewai](https://www.crewai.com/), [autogen](https://github.com/microsoft/autogen), [PydanticAI](https://ai.pydantic.dev/), just to name a few.
 - Modular architecture for easy extension. The competition agent is actually a collection of agents and tools including data processor, feature engineer, model builder, etc. You can add your own agents, tools, and LLMs.
+
+## What's Next
+- Add unit tests
+- Add GitHub actions for CI/CD
+- Add more competition examples
+- Support more LLMs
+- Support more ML tasks
+- Develop a whole new agent 
 
 ## Installation
 
