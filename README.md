@@ -4,7 +4,10 @@ A Python package for building AI agents to solve [Pond's AI model competitions](
 
 Currently, the package only includes the competition agent. More agents might be added in the future and you are invited to build them together!
 
-**Note**: As LLMs (e.g., GPT-4o) are not deterministic, the results may vary from run to run. It might even generate wrong code which cannot be executed. A bug fixing agent is included but it is not guaranteed to fix all bugs. If any error occurs, please rerun the notebook/script. If you encounter any issues, please report them as [GitHub Issues](https://github.com/Pond-International/pond-agent/issues).
+**Note**:
+* Because LLMs (e.g., GPT-4o) are non-deterministic, results may vary each time they run. They can also generate incorrect or non-executable code. While a bug-fixing agent is included, it may not catch every issue. If you encounter errors, please re-run the notebook/script. If problems persist, open an [issue](https://github.com/Pond-International/pond-agent/issues) on GitHub.
+* This package is still under development and is not intended for production use. Please proceed at your own risk.
+* There is no guarantee it will solve all ML problems or competitions. At present, only binary classification and regression tasks have been tested.
 
 ## Features
 - End-to-end agent for solving [Pond's AI model competitions](https://cryptopond.xyz/modelFactory/list). Currently, the agent supports supervised learning tasks but not recommendation tasks. 
