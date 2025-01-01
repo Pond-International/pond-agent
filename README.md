@@ -120,7 +120,8 @@ Check out the [examples](examples/) directory for:
 - Examples of execution logs and outputs
 
 Available examples:
-1. [Sybil Address Detection](examples/sybil_address/): End-to-end pipeline for the [sybil addresses detection competition](https://cryptopond.xyz/modelFactory/detail/2).
+1. [Sybil Address Prediction](examples/sybil_address/): End-to-end pipeline for the [Sybil Address Prediction](https://cryptopond.xyz/modelFactory/detail/2) competition.
+2. [Price Estimation on Pump.Fun](examples/pumpfun_price/): End-to-end pipeline for the [Price Estimation on Pump.Fun](https://cryptopond.xyz/modelFactory/detail/66) competition.
 
 ## Development
 
