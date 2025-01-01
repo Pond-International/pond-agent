@@ -1,6 +1,6 @@
-# Sybil Address Prediction Example
+# Example: Price Estimation on Pump.Fun
 
-This example demonstrates how to use the Competition Agent to solve the [Sybil Addresses Prediction competition](https://cryptopond.xyz/modelFactory/detail/2). It shows a complete end-to-end pipeline from data processing to submission.
+This example demonstrates how to use the Competition Agent to solve the [Price Estimation on Pump.Fun](https://cryptopond.xyz/modelFactory/detail/66) competition. It shows a complete end-to-end pipeline from data processing to submission.
 
 **Note**: Because LLMs (e.g., GPT-4o) are non-deterministic, results may vary each time they run. They can also generate incorrect or non-executable code. While a bug-fixing agent is included, it may not catch every issue. If you encounter errors, please re-run the notebook/script. If problems persist, open an [issue](https://github.com/Pond-International/pond-agent/issues) on GitHub.
 
@@ -9,14 +9,14 @@ This example demonstrates how to use the Competition Agent to solve the [Sybil A
 
 ### Provided in Repository
 ```
-sybil_address/
+pumpfun_price/
 ├── main.py              # Main script to run the competition agent
 └── main.ipynb          # Step-by-step tutorial notebook
 ```
 
 ### Required User Setup
 ```
-sybil_address/
+pumpfun_price/
 └── .env                # OpenAI API configuration (create this file)
 ```
 
@@ -51,12 +51,12 @@ OPENAI_API_KEY=your-api-key-here
    ```python
    agent = CompetitionAgent(
        working_dir=".",
-       competition_url="https://cryptopond.xyz/modelFactory/detail/2"
+       competition_url="https://cryptopond.xyz/modelFactory/detail/66"
    )
    ```
 
    **Option 2: Manual Download**
-   - Visit the [competition page](https://cryptopond.xyz/modelFactory/detail/2)
+   - Visit the [competition page](https://cryptopond.xyz/modelFactory/detail/66)
    - Copy text from Overview tab to `./overview.md`
    - Download data dictionary to `./data_dictionary.xlsx`
    - Download and unzip dataset files into `./dataset/`
