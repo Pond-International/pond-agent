@@ -21,8 +21,10 @@ Currently, the package only includes the competition agent. More agents might be
 - End-to-end agent for solving [Pond's AI model competitions](https://cryptopond.xyz/modelFactory/list). Currently, the agent supports supervised learning tasks but not recommendation tasks. 
 - Automatic competition data scraping - just provide the competition URL and the agent will download all necessary files
 - Minimalistic agent implementation using OpenAI's API directly. This way you can easily understand how the agent works and debug if things go wrong: use LLM to get instructions on how to solve a problem, use LLM to turn the instructions into code, and call tools such as Python to execute the code. However, this simplistic approach means it doesn't support many advanced features, such as memory, general tool usage, and complex workflows. But once you grasp the basics, it is easy to start with the fancier frameworks such as [LangChain](https://www.langchain.com/), [LlamaIndex](https://www.llamaindex.ai), [crewai](https://www.crewai.com/), [autogen](https://github.com/microsoft/autogen), [PydanticAI](https://ai.pydantic.dev/), just to name a few.
-- Modular architecture for easy extension. The competition agent is actually a collection of agents and tools including data processor, feature engineer, model builder, etc. You can add your own agents, tools, and LLMs.
-![competition_agent](https://github.com/user-attachments/assets/4205c45b-194a-498c-a5a2-c10d44bb704a)
+- Modular architecture for easy extension. The competition agent is actually a collection of agents and tools including data processor, feature engineer, model builder, etc. You can add your own agents, tools, and LLMs. 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4205c45b-194a-498c-a5a2-c10d44bb704a" width=25%>
+</p>
 
 ## What's Next
 - Add unit tests
